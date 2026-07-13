@@ -27,23 +27,29 @@ if (!savedData.maxCourses) savedData.maxCourses = 5;
 let courseData = { id: "", title: "", videos: [], videosProgress: {}, notes: {} };
 
 // --- Firebase Config Object ---
-// User must paste their Firebase config here
+// Load from environment variables (see .env.example and SECURITY.md)
 const firebaseConfig = {
-  apiKey: "AIzaSyBJF3av9wODz8r_tu-xwdvZ1Y8tjcI0nnc",
-  authDomain: "focustube1-36ac7.firebaseapp.com",
-  projectId: "focustube1-36ac7",
-  storageBucket: "focustube1-36ac7.firebasestorage.app",
-  messagingSenderId: "378393453266",
-  appId: "1:378393453266:web:55e0892b397a163645430b",
-  measurementId: "G-H8BBPD0R4G"
+  apiKey: window.__FIREBASE_CONFIG__?.apiKey,
+  authDomain: window.__FIREBASE_CONFIG__?.authDomain,
+  projectId: window.__FIREBASE_CONFIG__?.projectId,
+  storageBucket: window.__FIREBASE_CONFIG__?.storageBucket,
+  messagingSenderId: window.__FIREBASE_CONFIG__?.messagingSenderId,
+  appId: window.__FIREBASE_CONFIG__?.appId,
+  measurementId: window.__FIREBASE_CONFIG__?.measurementId,
 };
 
-try {
-    firebase.initializeApp(firebaseConfig);
-} catch (err) {
-    if (!/already exists/.test(err.message)) {
-        console.error('Firebase initialization error', err.stack);
-    }
+const isFirebaseConfigured = Object.values(firebaseConfig).every(val => val && val.length > 0);
+
+if (isFirebaseConfigured) {
+  try {
+      firebase.initializeApp(firebaseConfig);
+  } catch (err) {
+      if (!/already exists/.test(err.message)) {
+          console.error('Firebase initialization error', err.stack);
+      }
+  }
+} else {
+  console.warn('ℹ️ Firebase is not configured. Cloud sync will be disabled. See SECURITY.md for setup instructions.');
 }
 
 const AuthService = {
